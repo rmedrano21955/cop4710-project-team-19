@@ -5,7 +5,7 @@ export async function GET() {
   const rows = await query(
     `SELECT c.circuit_id, c.circuit_ref, c.name, c.location, c.country
      FROM circuits c
-     WHERE c.circuit_id IN (SELECT DISTINCT circuit_id FROM races)
+     WHERE c.circuit_id IN (SELECT DISTINCT circuit_id FROM races WHERE year >= 2010)
      ORDER BY c.name`
   );
   return NextResponse.json(rows);

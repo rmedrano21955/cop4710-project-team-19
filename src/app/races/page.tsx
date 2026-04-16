@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Select from "@/components/Select";
 
 interface Race {
   race_id: number;
@@ -64,25 +65,24 @@ export default function RacesPage() {
       <h1 className="text-3xl font-bold mb-6">Race Results</h1>
 
       <div className="flex flex-wrap gap-4 mb-8">
-        <select
+        <Select
           value={selectedSeason ?? ""}
           onChange={(e) => setSelectedSeason(e.target.value ? parseInt(e.target.value) : null)}
-          className="bg-card border border-border rounded-lg px-4 py-2 text-sm"
         >
           <option value="">Select Season</option>
           {seasons.map((y) => (
             <option key={y} value={y}>{y}</option>
           ))}
-        </select>
+        </Select>
 
-        <select
+        <Select
           value={selectedRace?.race_id ?? ""}
           onChange={(e) => {
             const race = races.find((r) => r.race_id === parseInt(e.target.value));
             setSelectedRace(race || null);
           }}
           disabled={!selectedSeason}
-          className="bg-card border border-border rounded-lg px-4 py-2 text-sm disabled:opacity-50"
+          className="disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <option value="">Select Race</option>
           {races.map((r) => (
@@ -90,7 +90,7 @@ export default function RacesPage() {
               Round {r.round} — {r.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       {!selectedSeason && (

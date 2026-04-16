@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import Select from "@/components/Select";
+
+type SortKey = "name" | "name_desc" | "nationality" | "wins" | "podiums" | "points" | "races";
 
 interface Driver {
   driver_id: number;
@@ -11,6 +14,10 @@ interface Driver {
   dob: string | null;
   nationality: string;
   headshot_url: string | null;
+  total_races: number;
+  wins: number;
+  podiums: number;
+  total_points: number;
 }
 
 interface DriverDetail extends Driver {
@@ -22,11 +29,43 @@ interface DriverDetail extends Driver {
   };
 }
 
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "name",        label: "Name (A–Z)" },
+  { value: "name_desc",   label: "Name (Z–A)" },
+  { value: "wins",        label: "Most Wins" },
+  { value: "podiums",     label: "Most Podiums" },
+  { value: "points",      label: "Most Points" },
+  { value: "races",       label: "Most Races" },
+  { value: "nationality", label: "Nationality" },
+];
+
+function sortDrivers(drivers: Driver[], key: SortKey): Driver[] {
+  return [...drivers].sort((a, b) => {
+    switch (key) {
+      case "name":
+        return a.surname.localeCompare(b.surname) || a.forename.localeCompare(b.forename);
+      case "name_desc":
+        return b.surname.localeCompare(a.surname) || b.forename.localeCompare(a.forename);
+      case "nationality":
+        return (a.nationality || "").localeCompare(b.nationality || "") || a.surname.localeCompare(b.surname);
+      case "wins":
+        return Number(b.wins) - Number(a.wins);
+      case "podiums":
+        return Number(b.podiums) - Number(a.podiums);
+      case "points":
+        return Number(b.total_points) - Number(a.total_points);
+      case "races":
+        return Number(b.total_races) - Number(a.total_races);
+    }
+  });
+}
+
 export default function DriversPage() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [nationalities, setNationalities] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [nationality, setNationality] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
   const [selected, setSelected] = useState<DriverDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -43,56 +82,57 @@ export default function DriversPage() {
       });
   };
 
+  useEffect(() => { fetchDrivers(); }, [nationality]);
   useEffect(() => {
-    fetchDrivers();
-  }, [nationality]);
-
-  useEffect(() => {
-    fetch("/api/drivers/nationalities")
-      .then((r) => r.json())
-      .then(setNationalities);
+    fetch("/api/drivers/nationalities").then((r) => r.json()).then(setNationalities);
   }, []);
-
   useEffect(() => {
-    const timeout = setTimeout(fetchDrivers, 300);
-    return () => clearTimeout(timeout);
+    const t = setTimeout(fetchDrivers, 300);
+    return () => clearTimeout(t);
   }, [search]);
+
+  const sorted = useMemo(() => sortDrivers(drivers, sortKey), [drivers, sortKey]);
 
   const openDetail = async (id: number) => {
     const res = await fetch(`/api/drivers/${id}`);
-    const data = await res.json();
-    setSelected(data);
+    setSelected(await res.json());
   };
 
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Drivers</h1>
 
-      <div className="flex flex-wrap gap-4 mb-8">
+      <div className="flex flex-wrap gap-3 mb-8">
         <input
           type="text"
           placeholder="Search by name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-card border border-border rounded-lg px-4 py-2 text-sm w-64"
+          className="bg-card border border-border rounded-lg px-4 py-2 text-sm w-56"
         />
-        <select
-          value={nationality}
-          onChange={(e) => setNationality(e.target.value)}
-          className="bg-card border border-border rounded-lg px-4 py-2 text-sm"
-        >
+        <Select value={nationality} onChange={(e) => setNationality(e.target.value)}>
           <option value="">All Nationalities</option>
           {nationalities.map((n) => (
             <option key={n} value={n}>{n}</option>
           ))}
-        </select>
+        </Select>
+        <Select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </Select>
+        <span className="self-center text-xs text-muted ml-1">
+          {sorted.length} driver{sorted.length !== 1 ? "s" : ""}
+        </span>
       </div>
 
       {loading ? (
         <p className="text-muted text-center py-16">Loading drivers...</p>
+      ) : sorted.length === 0 ? (
+        <p className="text-muted text-center py-16">No drivers found</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {drivers.map((d) => (
+          {sorted.map((d) => (
             <button
               key={d.driver_id}
               onClick={() => openDetail(d.driver_id)}
@@ -108,20 +148,34 @@ export default function DriversPage() {
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{d.forename} {d.surname}</p>
-                  <p className="text-sm text-muted">{d.nationality}</p>
+                  <p className="text-xs text-muted">{d.nationality}</p>
                 </div>
               </div>
-              <div className="flex gap-4 mt-3 text-xs text-muted">
-                {d.number && <span>#{d.number}</span>}
-                {d.code && <span className="font-mono">{d.code}</span>}
+
+              <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border/50">
+                <div className="text-center">
+                  <p className="text-sm font-bold font-mono">{Number(d.wins)}</p>
+                  <p className="text-xs text-muted">Wins</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold font-mono">{Number(d.podiums)}</p>
+                  <p className="text-xs text-muted">Podiums</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold font-mono">{Number(d.total_points).toFixed(0)}</p>
+                  <p className="text-xs text-muted">Pts</p>
+                </div>
               </div>
+
+              {(d.number || d.code) && (
+                <div className="flex gap-3 mt-2 text-xs text-muted">
+                  {d.number && <span>#{d.number}</span>}
+                  {d.code && <span className="font-mono">{d.code}</span>}
+                </div>
+              )}
             </button>
           ))}
         </div>
-      )}
-
-      {drivers.length === 0 && !loading && (
-        <p className="text-muted text-center py-16">No drivers found</p>
       )}
 
       {selected && (
@@ -147,7 +201,7 @@ export default function DriversPage() {
                 {selected.dob && (
                   <p className="text-sm text-muted">
                     Born {new Date(selected.dob).toLocaleDateString("en-US", {
-                      year: "numeric", month: "long", day: "numeric"
+                      year: "numeric", month: "long", day: "numeric",
                     })}
                   </p>
                 )}
@@ -156,10 +210,10 @@ export default function DriversPage() {
 
             <div className="grid grid-cols-2 gap-4">
               {[
-                { label: "Races", value: selected.stats.total_races },
-                { label: "Wins", value: selected.stats.wins },
+                { label: "Races",   value: selected.stats.total_races },
+                { label: "Wins",    value: selected.stats.wins },
                 { label: "Podiums", value: selected.stats.podiums },
-                { label: "Points", value: Number(selected.stats.total_points).toFixed(0) },
+                { label: "Points",  value: Number(selected.stats.total_points).toFixed(0) },
               ].map((s) => (
                 <div key={s.label} className="bg-background rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold font-mono">{s.value}</p>

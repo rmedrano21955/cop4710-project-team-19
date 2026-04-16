@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Select from "@/components/Select";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer,
@@ -114,10 +115,10 @@ export default function ComparePage() {
       <h1 className="text-3xl font-bold mb-6">Head-to-Head Compare</h1>
 
       <div className="flex flex-wrap gap-4 mb-6">
-        <select
+        <Select
           value={d1 ?? ""}
           onChange={(e) => setD1(e.target.value ? parseInt(e.target.value) : null)}
-          className="bg-card border border-border rounded-lg px-4 py-2 text-sm flex-1 min-w-[180px]"
+          className="flex-1 min-w-[180px]"
         >
           <option value="">Driver 1</option>
           {drivers.map((d) => (
@@ -125,12 +126,12 @@ export default function ComparePage() {
               {d.forename} {d.surname}
             </option>
           ))}
-        </select>
+        </Select>
 
-        <select
+        <Select
           value={d2 ?? ""}
           onChange={(e) => setD2(e.target.value ? parseInt(e.target.value) : null)}
-          className="bg-card border border-border rounded-lg px-4 py-2 text-sm flex-1 min-w-[180px]"
+          className="flex-1 min-w-[180px]"
         >
           <option value="">Driver 2</option>
           {drivers.map((d) => (
@@ -138,27 +139,19 @@ export default function ComparePage() {
               {d.forename} {d.surname}
             </option>
           ))}
-        </select>
+        </Select>
 
-        <select
-          value={fromYear ?? ""}
-          onChange={(e) => setFromYear(parseInt(e.target.value))}
-          className="bg-card border border-border rounded-lg px-4 py-2 text-sm"
-        >
+        <Select value={fromYear ?? ""} onChange={(e) => setFromYear(parseInt(e.target.value))}>
           {[...seasons].reverse().map((y) => (
             <option key={y} value={y}>{y}</option>
           ))}
-        </select>
+        </Select>
 
-        <select
-          value={toYear ?? ""}
-          onChange={(e) => setToYear(parseInt(e.target.value))}
-          className="bg-card border border-border rounded-lg px-4 py-2 text-sm"
-        >
+        <Select value={toYear ?? ""} onChange={(e) => setToYear(parseInt(e.target.value))}>
           {seasons.map((y) => (
             <option key={y} value={y}>{y}</option>
           ))}
-        </select>
+        </Select>
 
         <button
           onClick={fetchComparison}

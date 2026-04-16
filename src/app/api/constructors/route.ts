@@ -7,6 +7,8 @@ export async function GET() {
             COUNT(DISTINCT r.driver_id) AS driver_count
      FROM constructors c
      JOIN results r ON c.constructor_id = r.constructor_id
+     JOIN races ra ON r.race_id = ra.race_id
+     WHERE ra.year >= 2010
      GROUP BY c.constructor_id, c.constructor_ref, c.name, c.nationality
      ORDER BY c.name`
   );

@@ -3,8 +3,12 @@ import { join } from 'path';
 import { parse } from 'csv-parse/sync';
 import { Pool } from 'pg';
 
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+dotenv.config({ path: path.join(__dirname, '../.env.local') });
+
 const pool = new Pool({
-  connectionString: 'postgresql://yukinoyuu@localhost:5432/pitwall',
+  connectionString: process.env.DATABASE_URL,
 });
 
 const DATA_DIR = join(__dirname, '..', 'data');

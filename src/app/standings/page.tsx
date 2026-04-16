@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Select from "@/components/Select";
 
 interface Standing {
   position: number;
@@ -51,15 +52,14 @@ export default function StandingsPage() {
       <h1 className="text-3xl font-bold mb-6">Championship Standings</h1>
 
       <div className="flex flex-wrap items-center gap-4 mb-8">
-        <select
+        <Select
           value={selectedSeason ?? ""}
           onChange={(e) => setSelectedSeason(parseInt(e.target.value))}
-          className="bg-card border border-border rounded-lg px-4 py-2 text-sm"
         >
           {seasons.map((y) => (
             <option key={y} value={y}>{y}</option>
           ))}
-        </select>
+        </Select>
 
         <div className="flex bg-card border border-border rounded-lg overflow-hidden">
           {(["drivers", "constructors"] as const).map((t) => (

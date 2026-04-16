@@ -21,7 +21,8 @@ export async function GET(
     `SELECT DISTINCT d.driver_id, d.forename || ' ' || d.surname AS driver_name, d.nationality
      FROM results r
      JOIN drivers d ON r.driver_id = d.driver_id
-     WHERE r.constructor_id = $1
+     JOIN races ra ON r.race_id = ra.race_id
+     WHERE r.constructor_id = $1 AND ra.year >= 2010
      ORDER BY driver_name`,
     [constructorId]
   );

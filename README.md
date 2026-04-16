@@ -21,12 +21,27 @@ Formula 1 historical statistics browser (2010–2024), built for COP 4710 Theory
 
 ## Setup
 
-1. Install dependencies: `npm install`
-2. Start PostgreSQL and create the database: `createdb pitwall`
-3. Run schema: `psql pitwall < scripts/schema.sql`
-4. Place Kaggle CSVs in `data/` then seed: `npx tsx scripts/seed.ts`
-5. Copy `.env.local.example` to `.env.local` and set `DATABASE_URL`
-6. Run dev server: `npm run dev`
+Run the setup script — it handles everything automatically:
+
+```bash
+bash scripts/setup.sh
+```
+
+The script will:
+1. Check Node.js, npm, and PostgreSQL are installed
+2. Install npm dependencies
+3. Start PostgreSQL if it's not running
+4. Create `.env.local` and the `pitwall` database
+5. Apply the schema
+6. Prompt you to place the Kaggle CSV files in `data/` (see below)
+7. Import the data and fetch driver headshots
+
+**Kaggle dataset:** Download "Formula 1 World Championship (1950–2024)" by Rohan Rao from Kaggle and unzip the CSVs into the `data/` folder. The setup script will wait for you to do this before continuing.
+
+After setup, start the dev server:
+```bash
+npm run dev
+```
 
 ## Data Source
 
