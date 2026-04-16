@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PitWall — COP 4710 Team 19
 
-## Getting Started
+Formula 1 historical statistics browser (2010–2024), built for COP 4710 Theory and Structure of Databases at FSU.
 
-First, run the development server:
+## Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Next.js 14** (App Router, TypeScript)
+- **PostgreSQL 14** — raw SQL via `pg`, no ORM
+- **Tailwind CSS** — dark F1 pit-wall theme
+- **Recharts** — cumulative points chart on Compare page
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Drivers** — card grid with search, nationality filter, career stats modal
+- **Races** — season → race cascading selectors, 4-table JOIN results table
+- **Standings** — driver/constructor championship tabs, SUM + GROUP BY
+- **Constructors** — card grid with driver counts and detail view
+- **Circuits** — table with expandable race history rows
+- **Compare** — head-to-head stats with CASE WHEN aggregation + Recharts line chart
+- **Admin** — full CRUD for drivers, constructors, and circuits
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup
 
-## Learn More
+1. Install dependencies: `npm install`
+2. Start PostgreSQL and create the database: `createdb pitwall`
+3. Run schema: `psql pitwall < scripts/schema.sql`
+4. Place Kaggle CSVs in `data/` then seed: `npx tsx scripts/seed.ts`
+5. Copy `.env.local.example` to `.env.local` and set `DATABASE_URL`
+6. Run dev server: `npm run dev`
 
-To learn more about Next.js, take a look at the following resources:
+## Data Source
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Kaggle "Formula 1 World Championship (1950–2024)" by Rohan Rao — loaded via CSV bulk import, filtered to 2010–2024 seasons. Driver headshots from the OpenF1 API.
